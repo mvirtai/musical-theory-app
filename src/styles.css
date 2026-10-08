@@ -1546,3 +1546,13 @@ button:focus-visible {
     padding: 16px;
   }
 }
+
+.trail-more summary {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #5b6f63;
+  cursor: pointer;
+}

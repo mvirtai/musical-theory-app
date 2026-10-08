@@ -49,7 +49,9 @@ function IntervalGame({ state, dispatch }: IntervalGameProps) {
   function startLevel(levelId: LevelId) {
     stopPlayback();
     setAudioMessage(null);
-    dispatch({ type: "start", levelId, rounds: buildRounds(getLevel(levelId), Math.random) });
+    const rounds = buildRounds(getLevel(levelId), Math.random);
+    dispatch({ type: "start", levelId, rounds });
+    void listen(rounds[0]);
   }
 
   function leave() {
@@ -65,7 +67,7 @@ function IntervalGame({ state, dispatch }: IntervalGameProps) {
     } catch (error) {
       setAudioMessage(
         error instanceof AudioUnavailableError
-          ? "Sound is not available in this browser. Turn on “Show the notes as text” to keep playing."
+          ? "Sound is not available in this browser. Open “Options” and turn on “Show the notes as text” to keep playing."
           : "The sound could not be played. Check your device volume and try again.",
       );
     }
@@ -78,7 +80,9 @@ function IntervalGame({ state, dispatch }: IntervalGameProps) {
 
   function next() {
     stopPlayback();
+    const upcoming = session?.rounds[session.index + 1];
     dispatch({ type: "next" });
+    if (upcoming) void listen(upcoming);
   }
 
   function renderLevels() {
@@ -163,29 +167,16 @@ function IntervalGame({ state, dispatch }: IntervalGameProps) {
 
     return (
       <div className="trail-round">
-        <div className="trail-round__top">
-          <p className="trail-round__count">
-            Level {active.levelId} · Round {active.index + 1} of {active.rounds.length}
-          </p>
-          <button className="button button--ghost" onClick={leave} type="button">
-            Leave level
-          </button>
-        </div>
+        <p className="trail-round__count">
+          Level {active.levelId} · Round {active.index + 1} of {active.rounds.length}
+        </p>
 
         <h3 className="trail-round__prompt">Which interval did you hear?</h3>
 
         <div className="trail-actions">
-          <button className="button button--dark" onClick={() => void listen(round)} type="button">
-            {answered ? "Hear it again" : "Listen to the two notes"}
+          <button className="button button--ghost" onClick={() => void listen(round)} type="button">
+            Hear it again
           </button>
-          <label className="trail-toggle">
-            <input
-              checked={showNotes}
-              onChange={(event) => setShowNotes(event.target.checked)}
-              type="checkbox"
-            />
-            Show the notes as text
-          </label>
         </div>
 
         {showNotes ? <p className="trail-notes">Notes: {notesAsText(round)}</p> : null}
@@ -209,10 +200,7 @@ function IntervalGame({ state, dispatch }: IntervalGameProps) {
           {answered ? (
             <>
               <strong>{wasCorrect ? `Correct! +${XP_PER_CORRECT} XP` : `Not quite. That was a ${interval.name.toLowerCase()}.`}</strong>
-              <p>
-                {interval.name}: {interval.semitones} semitones. {interval.description}
-              </p>
-              <p>{notesAsText(round)}</p>
+              <p>{interval.description}</p>
             </>
           ) : null}
         </div>
@@ -224,6 +212,23 @@ function IntervalGame({ state, dispatch }: IntervalGameProps) {
             </button>
           </div>
         ) : null}
+
+        <details className="trail-more">
+            <summary>Options</summary>
+            <div className="trail-actions">
+              <label className="trail-toggle">
+                <input
+                  checked={showNotes}
+                  onChange={(event) => setShowNotes(event.target.checked)}
+                  type="checkbox"
+                />
+                Show the notes as text
+              </label>
+              <button className="button button--ghost" onClick={leave} type="button">
+                Leave level
+              </button>
+            </div>
+          </details>
       </div>
     );
   }

@@ -23,7 +23,7 @@ flowchart LR
   Feedback -->|round 5| Stars[Stars, XP, unlock]
 ```
 
-Game rules live in a pure reducer (`src/lib/game/interval-game.ts`) with an injected random source, so they are unit tested. Audio uses Web Audio, creates its context only after a user click, and falls back to a clear message when unavailable. A "Show the notes as text" option provides a non-audio alternative. Progress is kept in memory only, with A4 fixed at 440 Hz. The component uses `useReducer` and local `useState` with no effects or manual memoization.
+Game rules live in a pure reducer (`src/lib/game/interval-game.ts`) with an injected random source, so they are unit tested. Each round plays its two notes automatically from the click that starts the level or the next round, so no extra Listen step is needed; audio creates its context only after a user click, and falls back to a clear message when unavailable. Each round shows only the count, prompt, replay button, and choices; "Show the notes as text" and "Leave level" sit in a collapsed Options disclosure, which provides a non-audio alternative. Progress is kept in memory only, with A4 fixed at 440 Hz. The component uses `useReducer` and local `useState` with no effects or manual memoization.
 
 ## Files Changed
 

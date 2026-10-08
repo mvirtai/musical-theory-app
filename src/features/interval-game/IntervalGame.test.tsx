@@ -14,16 +14,15 @@ describe("IntervalGame", () => {
     expect(screen.getByText(/round 1 of 5/i)).toBeInTheDocument();
 
     await user.click(screen.getByRole("button", { name: "Unison" }));
-    expect(screen.getByRole("status")).toHaveTextContent(/semitones/i);
+    expect(screen.getByRole("status")).toHaveTextContent(/correct|not quite/i);
     expect(screen.getByRole("button", { name: /next round/i })).toBeInTheDocument();
   });
 
-  it("explains when sound is unavailable", async () => {
+  it("plays automatically and explains when sound is unavailable", async () => {
     const user = userEvent.setup();
     render(<App />);
 
     await user.click(screen.getByRole("button", { name: /same or higher/i }));
-    await user.click(screen.getByRole("button", { name: /listen to the two notes/i }));
     expect(await screen.findByRole("alert")).toHaveTextContent(/sound is not available/i);
   });
 });
