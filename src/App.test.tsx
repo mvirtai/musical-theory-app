@@ -19,8 +19,8 @@ describe("learning dashboard", () => {
 
     const paths = screen.getByRole("region", { name: /pick up a new idea/i });
     expect(
-      within(paths).getByRole("link", { name: /start with intervals/i }),
-    ).toHaveAttribute("href", "#how-it-works");
+      within(paths).getByRole("link", { name: /play the interval trail/i }),
+    ).toHaveAttribute("href", "#interval-trail");
     expect(within(paths).getByText("Harmony")).toBeInTheDocument();
     expect(within(paths).getByText("Rhythm")).toBeInTheDocument();
     expect(within(paths).getAllByText("Coming soon")).toHaveLength(2);
