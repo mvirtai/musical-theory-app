@@ -70,8 +70,8 @@ tasks:
   quality:
     desc: Run the checks used by the repository CI workflow
     cmds:
-      - npm test
-      - npm run build
+      - pnpm test
+      - pnpm run build
       - python3 .github/scripts/check_markdown.py
 
   pr:list:
