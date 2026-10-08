@@ -67,12 +67,49 @@ tasks:
     cmds:
       - git push --set-upstream "$REMOTE" HEAD
 
-  quality:
-    desc: Run the checks used by the repository CI workflow
+  dev:
+    desc: Start the Vite development server
     cmds:
-      - npm test
-      - npm run build
+      - pnpm dev
+
+  build:
+    desc: Typecheck and create a production build
+    cmds:
+      - pnpm build
+
+  test:
+    desc: Run the Vitest suite once
+    cmds:
+      - pnpm test
+
+  lint:
+    desc: Run ESLint (includes the React Compiler rules)
+    cmds:
+      - pnpm lint
+
+  typecheck:
+    desc: Run the TypeScript project build in noEmit mode
+    cmds:
+      - pnpm typecheck
+
+  markdown:
+    desc: Validate Markdown front matter and local links
+    cmds:
       - python3 .github/scripts/check_markdown.py
+
+  check:
+    desc: Run typecheck, lint, test, build and the Markdown check
+    cmds:
+      - task: typecheck
+      - task: lint
+      - task: test
+      - task: build
+      - task: markdown
+
+  quality:
+    desc: Alias for check (kept for existing references)
+    cmds:
+      - task: check
 
   pr:list:
     desc: List open pull requests
