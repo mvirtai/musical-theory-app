@@ -1,0 +1,167 @@
+version: '3'
+
+vars:
+  BASE: main
+  REMOTE: origin
+
+tasks:
+  default:
+    desc: List available Git, PR, and validation tasks
+    cmds:
+      - task --list
+    silent: true
+
+  git:status:
+    desc: Show the current branch and worktree status
+    cmds:
+      - git status --short --branch
+
+  git:branches:
+    desc: List local branches and their upstreams
+    cmds:
+      - git branch --verbose --verbose
+
+  git:log:
+    desc: Show the latest 10 commits
+    cmds:
+      - git --no-pager log --oneline --decorate -10
+
+  git:fetch:
+    desc: Fetch remote updates and prune deleted remote-tracking branches
+    env:
+      REMOTE: '{{.REMOTE}}'
+    cmds:
+      - git fetch --prune "$REMOTE"
+
+  git:pull:
+    desc: Update the current branch using fast-forward-only
+    preconditions:
+      - sh: test -z "$(git status --porcelain)"
+        msg: Commit or stash worktree changes before pulling.
+    cmds:
+      - git pull --ff-only
+
+  git:branch:
+    desc: Create and switch to a branch (task git:branch BRANCH=feat/my-change)
+    requires:
+      vars: [BRANCH]
+    env:
+      BRANCH: '{{.BRANCH}}'
+    cmds:
+      - git check-ref-format --branch "$BRANCH"
+      - git switch --create "$BRANCH"
+
+  git:commit:
+    desc: 'Commit staged changes (task git:commit MSG="feat: describe change")'
+    requires:
+      vars: [MSG]
+    env:
+      MSG: '{{.MSG}}'
+    cmds:
+      - git commit -m "$MSG"
+
+  git:push:
+    desc: Push the current branch and set its upstream
+    env:
+      REMOTE: '{{.REMOTE}}'
+    cmds:
+      - git push --set-upstream "$REMOTE" HEAD
+
+  quality:
+    desc: Run the checks used by the repository CI workflow
+    cmds:
+      - npm test
+      - npm run build
+      - python3 .github/scripts/check_markdown.py
+
+  pr:list:
+    desc: List open pull requests
+    cmds:
+      - gh pr list
+
+  pr:create:
+    desc: Create a pull request (task pr:create TITLE="..." BODY="...")
+    requires:
+      vars: [TITLE, BODY]
+    env:
+      BASE: '{{.BASE}}'
+      PR_TITLE: '{{.TITLE}}'
+      PR_BODY: '{{.BODY}}'
+    preconditions:
+      - sh: command -v gh
+        msg: GitHub CLI (gh) is required.
+    cmds:
+      - gh pr create --base "$BASE" --title "$PR_TITLE" --body "$PR_BODY"
+
+  pr:create-draft:
+    desc: Create a draft pull request (task pr:create-draft TITLE="..." BODY="...")
+    requires:
+      vars: [TITLE, BODY]
+    env:
+      BASE: '{{.BASE}}'
+      PR_TITLE: '{{.TITLE}}'
+      PR_BODY: '{{.BODY}}'
+    preconditions:
+      - sh: command -v gh
+        msg: GitHub CLI (gh) is required.
+    cmds:
+      - gh pr create --draft --base "$BASE" --title "$PR_TITLE" --body "$PR_BODY"
+
+  pr:view:
+    desc: View the pull request for the current branch or a specified number
+    env:
+      PR_NUMBER: '{{.NUMBER | default ""}}'
+    cmds:
+      - gh pr view ${PR_NUMBER:+"$PR_NUMBER"}
+
+  pr:checkout:
+    desc: Check out a pull request locally (task pr:checkout NUMBER=123)
+    requires:
+      vars: [NUMBER]
+    env:
+      PR_NUMBER: '{{.NUMBER}}'
+    cmds:
+      - gh pr checkout "$PR_NUMBER"
+
+  pr:diff:
+    desc: Show the pull request diff for the current branch or a specified number
+    env:
+      PR_NUMBER: '{{.NUMBER | default ""}}'
+    cmds:
+      - gh pr diff ${PR_NUMBER:+"$PR_NUMBER"}
+
+  pr:checks:
+    desc: Show CI checks for the current branch or a specified pull request
+    env:
+      PR_NUMBER: '{{.NUMBER | default ""}}'
+    cmds:
+      - gh pr checks ${PR_NUMBER:+"$PR_NUMBER"}
+
+  pr:ready:
+    desc: Mark the current draft pull request ready for review
+    cmds:
+      - gh pr ready
+
+  pr:draft:
+    desc: Convert the current pull request to draft
+    cmds:
+      - gh pr ready --undo
+
+  pr:merge:
+    desc: Merge a pull request with an explicit method (task pr:merge NUMBER=123 METHOD=squash)
+    requires:
+      vars: [NUMBER, METHOD]
+    env:
+      PR_NUMBER: '{{.NUMBER}}'
+      MERGE_METHOD: '{{.METHOD}}'
+    cmds:
+      - |
+        case "$MERGE_METHOD" in
+          merge|squash|rebase)
+            gh pr merge "$PR_NUMBER" "--$MERGE_METHOD"
+            ;;
+          *)
+            echo "METHOD must be one of: merge, squash, rebase" >&2
+            exit 1
+            ;;
+        esac
