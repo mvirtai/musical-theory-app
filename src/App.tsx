@@ -1,3 +1,7 @@
+import { useReducer } from "react";
+import IntervalGame from "./features/interval-game/IntervalGame";
+import { LEVELS, gameReducer, initialGameState } from "./lib/game/interval-game";
+
 type Topic = {
   title: string;
   description: string;
@@ -163,6 +167,9 @@ function PitchArtwork() {
 }
 
 function App() {
+  const [gameState, dispatch] = useReducer(gameReducer, initialGameState);
+  const completedLevels = LEVELS.filter((level) => gameState.stars[level.id] > 0).length;
+
   return (
     <>
       <a className="skip-link" href="#main-content">
@@ -314,11 +321,15 @@ function App() {
                     </div>
                     {topic.available ? (
                       <a
-                        aria-label="Start with intervals"
+                        aria-label="Play the interval trail"
                         className="topic-card__link"
-                        href="#how-it-works"
+                        href="#interval-trail"
                       >
-                        <span>Explore this path</span>
+                        <span>
+                          {completedLevels === 0
+                            ? "Start the trail"
+                            : `Continue the trail (${completedLevels}/${LEVELS.length})`}
+                        </span>
                         <svg aria-hidden="true" viewBox="0 0 20 20">
                           <path d="M4 10h11M10 5l5 5-5 5" />
                         </svg>
@@ -332,6 +343,8 @@ function App() {
                 ))}
               </div>
             </section>
+
+            <IntervalGame dispatch={dispatch} state={gameState} />
 
             <section
               aria-labelledby="approach-title"
