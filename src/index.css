@@ -1,0 +1,9 @@
+/* Global styles. Plain CSS only; no CSS framework is used. */
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+
+main {
+  padding: 1rem;
+}

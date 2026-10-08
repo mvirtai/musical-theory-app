@@ -6,7 +6,7 @@ This repository is an initially browser-first music-theory learning application.
 
 - Inspect the current worktree and repository instructions before editing. Preserve unrelated changes.
 - For a feature, inspect the existing code and conventions, present a concrete implementation plan, and wait for approval before changing application code.
-- Prefer existing project scripts and automation. If a `Taskfile.yml` defines the relevant task, use that task; do not invent Task names or claim that a task exists. Otherwise use the commands defined by the actual package manifest, CI configuration, or documented project setup.
+- Prefer existing project scripts and automation. If a `Taskfile.yml` defines the relevant task, use that task; do not invent Task names or claim that a task exists. The app tasks are `task dev`, `task build`, `task test`, `task lint`, `task typecheck`, `task markdown` and `task check` (runs all of them; CI runs the same). Otherwise use the commands defined by the actual package manifest, CI configuration, or documented project setup.
 - Keep changes scoped to the request. Do not add backend or framework scaffolding unless explicitly needed and approved.
 - Write code comments, docstrings, and comments in configuration/code files in English. User-facing copy should follow the repository's actual localization conventions.
 - Report only checks actually run and results actually observed.
